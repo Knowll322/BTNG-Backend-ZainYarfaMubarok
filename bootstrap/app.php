@@ -34,11 +34,13 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             $errors = $e->errors();
-            $jumlah = count($errors);
-            $pesan = $e->getMessage();
 
+            /*
+             * ValidationException sudah memformat pesannya sendiri menjadi
+             * "<pesan pertama> (and N more error)", jadi tidak perlu ditambah lagi.
+             */
             return response()->json([
-                'message' => $jumlah > 1 ? "{$pesan} (and ".($jumlah - 1).' more error)' : $pesan,
+                'message' => $e->getMessage(),
                 'data' => null,
                 'errors' => $errors,
             ], 422);

@@ -68,6 +68,10 @@ class MobilApiTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonStructure(['message', 'data', 'errors'])
             ->assertJsonValidationErrors(['plat_nomor', 'nama', 'brand', 'harga', 'transmisi']);
+
+        // Pesan ringkasan tidak boleh terduplikasi menjadi
+        // "... (and 8 more errors) (and 8 more error)".
+        $this->assertSame(1, substr_count($response->json('message'), '(and '));
     }
 
     public function test_show_mengembalikan_detail_dan_404_bila_tidak_ada(): void
