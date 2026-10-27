@@ -49,7 +49,8 @@ Proyek ini adalah Tugas Akhir Kelas Website Backend BTNG.
 - **Otentikasi Sanctum** — `register`, `login`, `me`, `logout` dengan Bearer token
 - **Upload foto unit** — disimpan ke Laravel Storage (disk `public`)
 - **Error handler global** — `401`, `404`, `405`, `409`, `422` tetap memakai amplop JSON yang sama
-- **32 feature test** (147 assertion) untuk CRUD, validasi, logika booking, dan denda
+- **32 feature test** (148 assertion) untuk CRUD, validasi, logika booking, dan denda
+- **Koleksi Postman** — 29 request dalam 7 folder, dengan test script dan auto-capture token/ID
 
 ---
 
@@ -471,6 +472,32 @@ Gate::define('viewApiDocs', fn ($user = null) => true);
 
 ---
 
+## Koleksi Postman
+
+Tersedia di [`postman/BTNG-Backend-ZainYarfaMubarok.postman_collection.json`](postman/BTNG-Backend-ZainYarfaMubarok.postman_collection.json) — **29 request** dalam 7 folder.
+
+| Folder | Isi |
+|---|---|
+| Health | Cek status API |
+| Auth | Register, Login, Profil saya, Logout |
+| Mobil | Daftar, Detail, Tambah, Perbarui, Upload foto, Hapus, Gagal validasi (422) |
+| Pelanggan | Daftar, Detail, Tambah, Perbarui, Hapus, Gagal validasi (422) |
+| Penyewaan | Daftar, Detail, Buat, Perbarui, Kembalikan, Batalkan, Hapus, Gagal bentrok (422) |
+| Statistik | Ringkasan dashboard |
+| Error Handling | 404 endpoint tidak ada, 401 tanpa token |
+
+Cara pakai:
+
+1. Import file JSON ke Postman.
+2. Sesuaikan variabel `baseUrl` — `http://127.0.0.1:8000` untuk lokal, atau URL Clever Cloud.
+3. Jalankan **Auth → Login**. Token tersimpan otomatis ke variabel `token` dan dipakai semua request lewat auth Bearer koleksi.
+4. Jalankan **Mobil → Tambah mobil** dan **Pelanggan → Tambah pelanggan**. ID hasil simpan tersimpan otomatis ke `mobilId` / `pelangganId`.
+5. Jalankan **Penyewaan → Buat penyewaan**. Pre-request script mengisi `tanggalMulai` (+7 hari) dan `tanggalSelesai` (+9 hari) secara otomatis.
+
+Setiap request punya test script yang memeriksa status code, amplop `message` + `data`, dan aturan bisnis (format `kode_booking`, `total_biaya = durasi_hari × harga_sewa_per_hari`).
+
+---
+
 ## Deploy ke Clever Cloud
 
 1. Buat aplikasi **PHP** di Clever Cloud, hubungkan repo GitHub ini (branch `main`).
@@ -513,7 +540,7 @@ CC_PRE_RUN_HOOK="php artisan config:clear && php artisan migrate --force"
 php artisan test
 ```
 
-Hasil saat ini: **32 passed, 147 assertions**.
+Hasil saat ini: **32 passed, 148 assertions**.
 
 Cakupan: amplop respons, validasi 422, 404 untuk data tidak ada, 409 untuk relasi FK, filter/pencarian/pagination, perhitungan durasi dan total, anti-bentrok jadwal, denda keterlambatan, sinkronisasi status unit, serta autentikasi token.
 
