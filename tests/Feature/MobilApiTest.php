@@ -175,6 +175,9 @@ class MobilApiTest extends TestCase
 
     public function test_auth_me_tanpa_token_401(): void
     {
-        $this->getJson('/api/auth/me')->assertUnauthorized();
+        $this->getJson('/api/auth/me')
+            ->assertUnauthorized()
+            ->assertJsonPath('data', null)
+            ->assertJsonStructure(['message', 'data']);
     }
 }
