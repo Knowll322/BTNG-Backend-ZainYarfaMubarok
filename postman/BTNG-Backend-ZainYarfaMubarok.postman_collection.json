@@ -1,0 +1,1407 @@
+{
+  "info": {
+    "name": "BTNG Showroom & Rental Mobil API",
+    "description": "Koleksi Postman untuk REST API Showroom & Rental Mobil (Laravel 12 + MySQL + Sanctum + Scramble).\n\n## Cara pakai\n\n1. Buka **Variables** koleksi ini, ubah `baseUrl` bila perlu.\n   - Lokal: `http://127.0.0.1:8000`\n   - Produksi: `https://<app-anda>.cleverapps.io`\n2. Jalankan folder **Auth** → request **Login**. Token tersimpan otomatis ke variabel `token`.\n3. Jalankan folder **Mobil** / **Pelanggan** → request **Create**. ID hasil simpan tersimpan otomatis ke `mobilId` / `pelangganId`.\n4. Jalankan folder **Penyewaan** → request **Create**. ID tersimpan ke `penyewaanId`.\n\n## Dokumentasi\n\n- Scramble UI: `{{baseUrl}}/docs/api`\n- OpenAPI JSON: `{{baseUrl}}/docs/api.json`\n\n## Akun demo (dari seeder)\n\n- Email: `admin@showroom.test`\n- Password: `password123`\n\nSeluruh respons memakai amplop `{ \"message\": ..., \"data\": ... }`. Koleksi terpaginasi menambahkan `meta` dan `links`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "mobilId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "pelangganId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "penyewaanId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "tanggalMulai",
+      "value": "2026-12-01",
+      "type": "string"
+    },
+    {
+      "key": "tanggalSelesai",
+      "value": "2026-12-04",
+      "type": "string"
+    }
+  ],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test('Status code bukan 5xx', function () {",
+          "    pm.expect(pm.response.code).to.be.below(500);",
+          "});",
+          "",
+          "pm.test('Respons memakai amplop message + data', function () {",
+          "    var body = pm.response.json();",
+          "    pm.expect(body).to.have.property('message');",
+          "    pm.expect(body).to.have.property('data');",
+          "});"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "description": "Cek kesiapan API.",
+      "item": [
+        {
+          "name": "Cek status API",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            },
+            "description": "Mengembalikan `status`, `versi`, dan `waktu` server. Berguna untuk memastikan deployment hidup."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('status = ok', function () {",
+                  "    pm.expect(pm.response.json().data.status).to.eql('ok');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "description": "Registrasi, login, profil, dan logout. Token Bearer disimpan otomatis ke variabel `token`.",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Operator Showroom\",\n    \"email\": \"operator@showroom.test\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Membuat akun baru dan langsung menerbitkan token. Status sukses: **201 Created**."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('token', pm.response.json().data.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@showroom.test\",\n    \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login dengan akun seeder. Token disimpan otomatis ke variabel koleksi `token`, sehingga request lain yang memakai auth Bearer langsung jalan."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Token diterbitkan', function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body.data).to.have.property('token');",
+                  "    pm.expect(body.data.token).to.be.a('string').and.not.empty;",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('token', pm.response.json().data.token);",
+                  "    console.log('Token tersimpan ke variabel koleksi.');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Profil saya",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            },
+            "description": "Butuh header `Authorization: Bearer {{token}}` (sudah diwarisi dari auth koleksi)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Berisi email pengguna', function () {",
+                  "    pm.expect(pm.response.json().data).to.have.property('email');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "logout"]
+            },
+            "description": "Mencabut token yang sedang dipakai. Setelah ini variabel `token` perlu diisi ulang lewat Login."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('token', '');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Mobil",
+      "description": "CRUD unit mobil + upload foto. Filter: `search`, `brand`, `status`, `transmisi`, `bahan_bakar`, `tahun`, `min_harga`, `max_harga`, `max_harga_sewa`, `sort_by`, `sort_dir`, `per_page`.",
+      "item": [
+        {
+          "name": "Daftar mobil",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/mobil?brand=Toyota&status=tersedia&sort_by=harga_sewa_harian&sort_dir=asc&per_page=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mobil"],
+              "query": [
+                {
+                  "key": "brand",
+                  "value": "Toyota",
+                  "description": "Filter merk. Kosongkan untuk semua."
+                },
+                {
+                  "key": "status",
+                  "value": "tersedia",
+                  "description": "tersedia | disewa | servis | sold"
+                },
+                {
+                  "key": "sort_by",
+                  "value": "harga_sewa_harian",
+                  "description": "nama | brand | harga | harga_sewa_harian | tahun | created_at"
+                },
+                {
+                  "key": "sort_dir",
+                  "value": "asc",
+                  "description": "asc | desc"
+                },
+                {
+                  "key": "per_page",
+                  "value": "10",
+                  "description": "1-100, default 10"
+                }
+              ]
+            },
+            "description": "Mengembalikan `message`, `data[]`, `meta` (pagination), dan `links`."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('data berupa array', function () {",
+                  "    pm.expect(pm.response.json().data).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('meta pagination lengkap', function () {",
+                  "    var meta = pm.response.json().meta;",
+                  "    pm.expect(meta).to.include.keys('current_page', 'per_page', 'total', 'last_page');",
+                  "});",
+                  "",
+                  "var pertama = pm.response.json().data[0];",
+                  "if (pertama) {",
+                  "    pm.collectionVariables.set('mobilId', pertama.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Detail mobil",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/mobil/{{mobilId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mobil", "{{mobilId}}"]
+            },
+            "description": "Ambil satu unit berdasarkan ID. ID tidak ada → **404** dengan `data: null`."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('id sesuai permintaan', function () {",
+                  "    var id = parseInt(pm.collectionVariables.get('mobilId'), 10);",
+                  "    pm.expect(pm.response.json().data.id).to.eql(id);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tambah mobil",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"plat_nomor\": \"B 1234 XYZ\",\n    \"nama\": \"Toyota Avanza 1.5 G CVT\",\n    \"brand\": \"Toyota\",\n    \"harga\": 275000000,\n    \"harga_sewa_harian\": 350000,\n    \"tahun\": 2024,\n    \"transmisi\": \"CVT\",\n    \"bahan_bakar\": \"Bensin\",\n    \"kapasitas_kursi\": 7,\n    \"foto\": \"https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=1200\",\n    \"deskripsi\": \"MPV keluarga, kabin lega, konsumsi BBM irit.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/mobil",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mobil"]
+            },
+            "description": "Status sukses: **201 Created**. `status` tidak perlu dikirim, default `tersedia`. ID hasil simpan otomatis masuk ke variabel `mobilId`."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    var body = pm.response.json();",
+                  "    pm.collectionVariables.set('mobilId', body.data.id);",
+                  "    pm.test('status default tersedia', function () {",
+                  "        pm.expect(body.data.status).to.eql('tersedia');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Perbarui mobil",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"harga_sewa_harian\": 375000,\n    \"status\": \"servis\",\n    \"deskripsi\": \"Sedang perawatan berkala di bengkel resmi.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/mobil/{{mobilId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mobil", "{{mobilId}}"]
+            },
+            "description": "Boleh `PUT` (semua field) atau `PATCH` (sebagian field). Status sukses: **200 OK**."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('harga sewa ikut berubah', function () {",
+                  "    pm.expect(pm.response.json().data.harga_sewa_harian).to.eql(375000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Upload foto mobil",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "src": [],
+                  "description": "File gambar: jpg, jpeg, png, atau webp. Maksimal 2 MB."
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/mobil/{{mobilId}}/foto",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mobil", "{{mobilId}}", "foto"]
+            },
+            "description": "Kirim sebagai `multipart/form-data`. File disimpan di disk `public` dan URL-nya dikembalikan pada field `foto`."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('field foto berisi URL', function () {",
+                  "    pm.expect(pm.response.json().data.foto).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hapus mobil",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/mobil/{{mobilId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mobil", "{{mobilId}}"]
+            },
+            "description": "Status sukses **200 OK**. Bila unit masih punya riwayat penyewaan → **409 Conflict** (integritas foreign key)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 dihapus atau 409 masih punya riwayat', function () {",
+                  "    pm.expect([200, 409]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Gagal validasi (422)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"plat_nomor\": \"\",\n    \"harga\": \"mahal\",\n    \"transmisi\": \"Otomatis\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/mobil",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mobil"]
+            },
+            "description": "Contoh input anomali. Harus menghasilkan **422 Unprocessable Content** dengan `message`, `data: null`, dan `errors` per field."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422 Unprocessable Content', function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "",
+                  "pm.test('errors memuat field yang salah', function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('errors');",
+                  "    pm.expect(body.errors).to.include.keys('plat_nomor', 'nama', 'harga');",
+                  "});",
+                  "",
+                  "pm.test('data null saat gagal', function () {",
+                  "    pm.expect(pm.response.json().data).to.eql(null);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Pelanggan",
+      "description": "CRUD pelanggan. Filter: `search`, `email`, `sort_by`, `sort_dir`, `per_page`.",
+      "item": [
+        {
+          "name": "Daftar pelanggan",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pelanggan?per_page=10&sort_by=nama&sort_dir=asc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "pelanggan"],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "10",
+                  "description": "1-100"
+                },
+                {
+                  "key": "sort_by",
+                  "value": "nama",
+                  "description": "nama | email | created_at"
+                },
+                {
+                  "key": "sort_dir",
+                  "value": "asc",
+                  "description": "asc | desc"
+                }
+              ]
+            },
+            "description": "Tambahkan `?search=zain` untuk mencari pada nama, email, NIK, dan telepon."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var pertama = pm.response.json().data[0];",
+                  "if (pertama) {",
+                  "    pm.collectionVariables.set('pelangganId', pertama.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Detail pelanggan",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pelanggan/{{pelangganId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "pelanggan", "{{pelangganId}}"]
+            },
+            "description": "ID tidak ada → **404**."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tambah pelanggan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nama\": \"Zain Yarfa Mubarok\",\n    \"nik\": \"3273010101010001\",\n    \"email\": \"zain@example.com\",\n    \"telepon\": \"081234567001\",\n    \"alamat\": \"Jl. Cihampelas No. 112, Bandung\",\n    \"nomor_sim\": \"SIM-327301010101\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/pelanggan",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "pelanggan"]
+            },
+            "description": "`nik` wajib 16 digit dan unik, `email` unik, `nomor_sim` unik. Status sukses: **201 Created**."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('pelangganId', pm.response.json().data.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Perbarui pelanggan",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"telepon\": \"081234567999\",\n    \"alamat\": \"Jl. Dago No. 45, Bandung\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/pelanggan/{{pelangganId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "pelanggan", "{{pelangganId}}"]
+            },
+            "description": "Status sukses: **200 OK**."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hapus pelanggan",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pelanggan/{{pelangganId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "pelanggan", "{{pelangganId}}"]
+            },
+            "description": "**200 OK** bila berhasil. **409 Conflict** bila pelanggan masih punya riwayat penyewaan."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 dihapus atau 409 masih punya riwayat', function () {",
+                  "    pm.expect([200, 409]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Gagal validasi (422)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nama\": \"\",\n    \"nik\": \"123\",\n    \"email\": \"bukan-email\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/pelanggan",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "pelanggan"]
+            },
+            "description": "NIK bukan 16 digit dan email tidak valid → **422**."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422 Unprocessable Content', function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "",
+                  "pm.test('errors memuat nik dan email', function () {",
+                  "    pm.expect(pm.response.json().errors).to.include.keys('nik', 'email');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Penyewaan",
+      "description": "Transaksi rental. Server menghitung `kode_booking`, `durasi_hari` (inklusif), `harga_sewa_per_hari`, dan `total_biaya`. Tanggal divalidasi anti-bentrok per unit.\n\nFolder ini punya pre-request script yang mengisi `tanggalMulai` (+7 hari) dan `tanggalSelesai` (+9 hari) secara otomatis.",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "var mulai = new Date();",
+              "mulai.setDate(mulai.getDate() + 7);",
+              "",
+              "var selesai = new Date(mulai.getTime());",
+              "selesai.setDate(selesai.getDate() + 2);",
+              "",
+              "function iso(d) {",
+              "    var bulan = ('0' + (d.getMonth() + 1)).slice(-2);",
+              "    var hari = ('0' + d.getDate()).slice(-2);",
+              "    return d.getFullYear() + '-' + bulan + '-' + hari;",
+              "}",
+              "",
+              "pm.collectionVariables.set('tanggalMulai', iso(mulai));",
+              "pm.collectionVariables.set('tanggalSelesai', iso(selesai));"
+            ]
+          }
+        }
+      ],
+      "item": [
+        {
+          "name": "Daftar penyewaan",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/penyewaan?status=berjalan&per_page=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "penyewaan"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "berjalan",
+                  "description": "booked | berjalan | selesai | batal"
+                },
+                {
+                  "key": "per_page",
+                  "value": "10",
+                  "description": "1-100"
+                }
+              ]
+            },
+            "description": "Setiap item menyertakan relasi `mobil` dan `pelanggan`. Filter lain: `mobil_id`, `pelanggan_id`, `kode_booking`, `dari`, `sampai`, `search`, `sort_by`, `sort_dir`."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('relasi mobil dan pelanggan ikut', function () {",
+                  "    var data = pm.response.json().data;",
+                  "    if (data.length > 0) {",
+                  "        pm.expect(data[0]).to.have.property('mobil');",
+                  "        pm.expect(data[0]).to.have.property('pelanggan');",
+                  "    }",
+                  "});",
+                  "",
+                  "var pertama = pm.response.json().data[0];",
+                  "if (pertama) {",
+                  "    pm.collectionVariables.set('penyewaanId', pertama.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Detail penyewaan",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/penyewaan/{{penyewaanId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "penyewaan", "{{penyewaanId}}"]
+            },
+            "description": "Detail satu transaksi beserta relasinya."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buat penyewaan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"mobil_id\": {{mobilId}},\n    \"pelanggan_id\": {{pelangganId}},\n    \"tanggal_mulai\": \"{{tanggalMulai}}\",\n    \"tanggal_selesai\": \"{{tanggalSelesai}}\",\n    \"status\": \"booked\",\n    \"catatan\": \"Ambil unit di showroom pukul 09.00.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/penyewaan",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "penyewaan"]
+            },
+            "description": "Klien hanya mengirim unit, pelanggan, dan tanggal. Server menghitung sisanya.\n\nStatus sukses **201 Created**. Bila rentang tanggal bertumpuk dengan penyewaan aktif pada unit yang sama → **422** pada field `tanggal_mulai`."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    var body = pm.response.json();",
+                  "    pm.collectionVariables.set('penyewaanId', body.data.id);",
+                  "",
+                  "    pm.test('kode booking berformat BK-YYYYMMDD-XXXXX', function () {",
+                  "        pm.expect(body.data.kode_booking).to.match(/^BK-\\d{8}-[A-Z0-9]{5}$/);",
+                  "    });",
+                  "",
+                  "    pm.test('total = durasi x harga harian', function () {",
+                  "        pm.expect(body.data.total_biaya).to.eql(body.data.durasi_hari * body.data.harga_sewa_per_hari);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Perbarui penyewaan",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"status\": \"berjalan\",\n    \"catatan\": \"Unit sudah diambil pelanggan.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/penyewaan/{{penyewaanId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "penyewaan", "{{penyewaanId}}"]
+            },
+            "description": "Mengubah status ke `berjalan` otomatis menandai unit sebagai `disewa`. Perubahan tanggal akan menghitung ulang durasi dan total."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('status menjadi berjalan', function () {",
+                  "    pm.expect(pm.response.json().data.status).to.eql('berjalan');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Kembalikan unit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"tanggal_dikembalikan\": \"{{tanggalSelesai}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/penyewaan/{{penyewaanId}}/kembalikan",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "penyewaan", "{{penyewaanId}}", "kembalikan"]
+            },
+            "description": "Menutup transaksi: status menjadi `selesai`, unit kembali `tersedia`, dan denda dihitung otomatis.\n\n**Rumus denda:** 50% x `harga_sewa_per_hari` x jumlah hari terlambat. Tanpa `tanggal_dikembalikan`, dipakai tanggal hari ini."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('status selesai dan denda terisi', function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body.data.status).to.eql('selesai');",
+                  "    pm.expect(body.data).to.have.property('denda');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Batalkan penyewaan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/penyewaan/{{penyewaanId}}/batalkan",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "penyewaan", "{{penyewaanId}}", "batalkan"]
+            },
+            "description": "Status menjadi `batal` dan unit dilepas kembali ke `tersedia`."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('status batal', function () {",
+                  "    pm.expect(pm.response.json().data.status).to.eql('batal');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hapus penyewaan",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/penyewaan/{{penyewaanId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "penyewaan", "{{penyewaanId}}"]
+            },
+            "description": "Menghapus riwayat transaksi. Status sukses **200 OK**."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Gagal bentrok jadwal (422)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"mobil_id\": {{mobilId}},\n    \"pelanggan_id\": {{pelangganId}},\n    \"tanggal_mulai\": \"{{tanggalMulai}}\",\n    \"tanggal_selesai\": \"{{tanggalSelesai}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/penyewaan",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "penyewaan"]
+            },
+            "description": "Jalankan setelah **Buat penyewaan** dengan unit dan tanggal yang sama. Harus menghasilkan **422** karena jadwal bertumpuk."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422 jadwal bentrok', function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "",
+                  "pm.test('errors menyebut tanggal_mulai', function () {",
+                  "    pm.expect(pm.response.json().errors).to.have.property('tanggal_mulai');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Statistik",
+      "description": "Ringkasan operasional untuk dashboard.",
+      "item": [
+        {
+          "name": "Ringkasan statistik",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/statistik",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "statistik"]
+            },
+            "description": "Memuat `total_mobil`, `mobil_per_status`, `total_pelanggan`, `total_penyewaan`, `penyewaan_per_status`, `pendapatan_total`, `pendapatan_bulan_ini`, `mobil_terpopuler`, dan `penyewaan_terbaru`."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('field statistik lengkap', function () {",
+                  "    var data = pm.response.json().data;",
+                  "    pm.expect(data).to.include.keys('total_mobil', 'total_pelanggan', 'total_penyewaan', 'pendapatan_total');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Error Handling",
+      "description": "Bukti amplop JSON tetap konsisten pada kondisi gagal.",
+      "item": [
+        {
+          "name": "404 endpoint tidak ada",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tidak-ada",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tidak-ada"]
+            },
+            "description": "Endpoint tidak dikenal harus tetap mengembalikan JSON, bukan halaman HTML error."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404 dengan amplop JSON', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('message');",
+                  "    pm.expect(body.data).to.eql(null);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "401 tanpa token",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            },
+            "description": "Request ini sengaja tanpa header Authorization (auth di-override `noauth`) → **401 Unauthorized** dalam format JSON."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401 Unauthorized', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test('respons JSON, bukan redirect HTML', function () {",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
