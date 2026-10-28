@@ -90,8 +90,8 @@ endpoint login, sehingga penguji langsung tahu langkah berikutnya.
 - **Otentikasi Sanctum** — `register`, `login`, `me`, `logout` dengan Bearer token
 - **Upload foto unit** — disimpan ke Laravel Storage (disk `public`)
 - **Error handler global** — `401`, `404`, `405`, `409`, `422` tetap memakai amplop JSON yang sama
-- **44 feature test** (195 assertion) untuk CRUD, validasi, logika booking, dan denda
-- **Koleksi Postman** — 29 request dalam 7 folder, dengan test script dan auto-capture token/ID
+- **49 feature test** (209 assertion) untuk CRUD, validasi, logika booking, denda, dan URL foto
+- **Koleksi Postman** - 32 request dalam 8 folder, dengan test script dan auto-capture token/ID
 
 ---
 
@@ -553,16 +553,25 @@ Setiap request punya test script yang memeriksa status code, amplop `message` + 
 3. Buka **Environment variables** → mode **EXPERT**, isi:
 
 ```
-CC_WEBROOT="/public"
-CC_PHP_VERSION="8.3"
-APP_ENV="production"
-APP_DEBUG="false"
-APP_KEY="base64:..."
-APP_URL="https://app-f4092249-75ca-459c-a6be-782e7a51f20c.cleverapps.io"
-LOG_CHANNEL="stderr"
-DB_CONNECTION="mysql"
+CC_WEBROOT=/public
+CC_PHP_VERSION=8.3
+APP_ENV=production
+APP_DEBUG=false
+APP_KEY=base64:...
+APP_URL=https://app-f4092249-75ca-459c-a6be-782e7a51f20c.cleverapps.io
+LOG_CHANNEL=stderr
+DB_CONNECTION=mysql
 CC_PRE_RUN_HOOK=php artisan storage:link && php artisan config:clear && php artisan migrate --force && php artisan db:seed --force
 ```
+
+Nilai di atas **tanpa tanda kutip**. Clever Cloud mode EXPERT menyimpan nilai
+apa adanya, jadi `APP_URL="https://..."` menyimpan tanda kutipnya secara
+literal. Aplikasi tetap dapat dibangun — `config/app.php` menormalkan nilai
+itu — tetapi `config/filesystems.php` dahulu membaca `env('APP_URL')` mentah
+sehingga URL foto menjadi
+`APP_URL="https://..."/storage/mobil/xxxx.png` dan tidak dapat dibuka.
+Pembacaan sekarang memakai `config('app.url')`, dan `FotoUrlTest` menjaga agar
+tidak kembali. Tetap tulis tanpa tanda kutip.
 
 Baris `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD`
 **tidak perlu diisi**. Clever Cloud menyuntik kredensial dengan nama
@@ -598,7 +607,7 @@ cadangan. Menulis `DB_*` secara manual justru berisiko menimpa nilai add-on.
 php artisan test
 ```
 
-Hasil saat ini: **44 passed, 195 assertions**.
+Hasil saat ini: **49 passed, 209 assertions**.
 
 Cakupan: amplop respons, validasi 422, 404 untuk data tidak ada, 409 untuk relasi FK, filter/pencarian/pagination, perhitungan durasi dan total, anti-bentrok jadwal, denda keterlambatan, sinkronisasi status unit, serta autentikasi token.
 

@@ -41,7 +41,20 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
+            /*
+             * Memakai config('app.url'), bukan env('APP_URL').
+             *
+             * config/app.php sudah menormalkan APP_URL (membuang tanda kutip
+             * dan spasi, memastikan skema http/https, membuang garis miring
+             * di akhir). Membaca env() langsung di sini melewati normalisasi
+             * itu, sehingga nilai seperti APP_URL="https://contoh.test" —
+             * yang tanda kutipnya ikut tersimpan di Clever Cloud — menjadi
+             * URL foto yang rusak: APP_URL="https://contoh.test"/storage/...
+             * Berkasnya terunggah benar, tetapi URL yang disimpan tidak dapat
+             * dibuka. Gejala ini tidak muncul di lokal karena .env lokal tidak
+             * memakai tanda kutip.
+             */
+            'url' => config('app.url').'/storage',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,
