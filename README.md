@@ -16,12 +16,12 @@ Proyek ini adalah Tugas Akhir Kelas Website Backend BTNG.
 
 | Keterangan | URL |
 |---|---|
-| Base URL API | `https://<domain-anda>/api` |
-| Dokumentasi Interaktif (Scramble) | `https://<domain-anda>/docs/api` |
-| OpenAPI JSON | `https://<domain-anda>/docs/api.json` |
+| Base URL API | `https://app-f4092249-75ca-459c-a6be-782e7a51f20c.cleverapps.io/api` |
+| Dokumentasi Interaktif (Scramble) | `https://app-f4092249-75ca-459c-a6be-782e7a51f20c.cleverapps.io/docs/api` |
+| OpenAPI JSON | `https://app-f4092249-75ca-459c-a6be-782e7a51f20c.cleverapps.io/docs/api.json` |
 | Repository | https://github.com/zainnanann2/BTNG-Backend-ZainYarfaMubarok |
 
-> Ganti `<domain-anda>` dengan domain aplikasi Clever Cloud setelah deploy (contoh: `app-xxxxxxxx.cleverapps.app`). Membuka root `/` akan otomatis diarahkan ke `/docs/api`.
+> Aplikasi berjalan di Clever Cloud zona Singapore, dengan add-on MySQL zona Paris. Membuka root `/` akan otomatis diarahkan ke `/docs/api`.
 
 ---
 
@@ -506,31 +506,41 @@ Setiap request punya test script yang memeriksa status code, amplop `message` + 
 
 ```
 CC_WEBROOT="/public"
-CC_PHP_VERSION="8.4"
+CC_PHP_VERSION="8.3"
 APP_ENV="production"
 APP_DEBUG="false"
 APP_KEY="base64:..."
-APP_URL="https://<domain-anda>"
+APP_URL="https://app-f4092249-75ca-459c-a6be-782e7a51f20c.cleverapps.io"
 LOG_CHANNEL="stderr"
 DB_CONNECTION="mysql"
-DB_HOST="<dari add-on>"
-DB_PORT="<dari add-on>"
-DB_DATABASE="<dari add-on>"
-DB_USERNAME="<dari add-on>"
-DB_PASSWORD="<dari add-on>"
-CC_PRE_RUN_HOOK="php artisan config:clear && php artisan migrate --force"
+CC_PRE_RUN_HOOK="php artisan config:clear && php artisan migrate --force && php artisan db:seed --force"
 ```
 
-4. Klik **Update changes**, lalu **Restart** aplikasi.
+Baris `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD`
+**tidak perlu diisi**. Clever Cloud menyuntik kredensial dengan nama
+`MYSQL_ADDON_*`, dan `config/database.php` sudah membaca nama itu sebagai
+cadangan. Menulis `DB_*` secara manual justru berisiko menimpa nilai add-on.
+
+4. Klik **Update changes**, lalu **RE-BUILD AND START** (bukan sekadar START —
+   build diperlukan agar commit terbaru terpakai).
 5. Pantau tab **Logs** sampai Composer selesai, migrasi berjalan, dan Apache/PHP siap.
-6. Buka `https://<domain-anda>/docs/api`.
+6. Buka `https://app-f4092249-75ca-459c-a6be-782e7a51f20c.cleverapps.io/docs/api`.
 
 **Catatan penting:**
 
 - `CC_WEBROOT=/public` wajib. Tanpa ini Clever Cloud membaca root proyek dan muncul **403 Forbidden**.
-- Nilai `DB_*` disalin dari add-on MySQL, **bukan** dari database kelas.
-- `CC_PRE_RUN_HOOK` menjalankan migrasi setiap aplikasi start. Bila kredensial salah, aplikasi gagal start — periksa log.
+- `APP_URL` harus berupa URL sungguhan saat build berjalan. Placeholder seperti
+  `https://<domain-anda>` membuat `php artisan package:discover` gagal dengan
+  `Invalid URI: Host is malformed`, dan seluruh deploy ditandai **Failed**
+  dalam hitungan detik. Nilai ini dibaca saat build, bukan hanya saat runtime.
+- `CC_PHP_VERSION` sebaiknya `8.3` atau lebih baru; PHP 8.2 mencapai
+  end-of-life pada 31 Desember 2026.
+- `CC_PRE_RUN_HOOK` menjalankan migrasi dan seeder setiap aplikasi start.
+  Keduanya idempoten, jadi aman diulang. Bila hook gagal, deploy ikut gagal —
+  periksa log.
 - `APP_KEY` harus diisi, kalau tidak semua request menghasilkan **500**.
+- Add-on dan aplikasi boleh berada di zona berbeda (di sini aplikasi Singapore,
+  database Paris). Yang tidak bisa lintas zona hanya FSBucket.
 
 ---
 

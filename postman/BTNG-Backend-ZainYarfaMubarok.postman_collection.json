@@ -1,7 +1,7 @@
-{
+﻿{
   "info": {
     "name": "BTNG Showroom & Rental Mobil API",
-    "description": "Koleksi Postman untuk REST API Showroom & Rental Mobil (Laravel 12 + MySQL + Sanctum + Scramble).\n\n## Cara pakai\n\n1. Tab **Variables** koleksi ini: sesuaikan `baseUrl`.\n   - Lokal: `http://127.0.0.1:8000`\n   - Produksi: `https://<app-anda>.cleverapps.io`\n2. Jalankan folder **Auth** → **Login**. Token tersimpan otomatis ke variabel `token`.\n3. Jalankan folder **Mobil**, **Pelanggan**, **Penyewaan** berurutan. ID hasil simpan tersimpan otomatis.\n\n## Koleksi ini idempoten\n\nSetiap request **Create** memakai data unik yang dihasilkan pre-request script (plat nomor, NIK, email, nomor SIM), dan setiap request **Delete** menghapus data yang baru dibuatnya sendiri. Koleksi bisa dijalankan berulang tanpa bentrok data lama.\n\n## Dokumentasi\n\n- Scramble UI: `{{baseUrl}}/docs/api`\n- OpenAPI JSON: `{{baseUrl}}/docs/api.json`\n\n## Akun demo (dari seeder)\n\n- Email: `admin@showroom.test`\n- Password: `password123`\n\nSeluruh respons memakai amplop `{ \"message\": ..., \"data\": ... }`. Koleksi terpaginasi menambahkan `meta` dan `links`.",
+    "description": "Koleksi Postman untuk REST API Showroom & Rental Mobil (Laravel 12 + MySQL + Sanctum + Scramble).\n\n## Cara pakai\n\n1. Tab **Variables** koleksi ini: sesuaikan `baseUrl`.\n   - Lokal: `http://127.0.0.1:8000`\n   - Produksi: `https://app-f4092249-75ca-459c-a6be-782e7a51f20c.cleverapps.io`\n2. Jalankan folder **Auth** â†’ **Login**. Token tersimpan otomatis ke variabel `token`.\n3. Jalankan folder **Mobil**, **Pelanggan**, **Penyewaan** berurutan. ID hasil simpan tersimpan otomatis.\n\n## Koleksi ini idempoten\n\nSetiap request **Create** memakai data unik yang dihasilkan pre-request script (plat nomor, NIK, email, nomor SIM), dan setiap request **Delete** menghapus data yang baru dibuatnya sendiri. Koleksi bisa dijalankan berulang tanpa bentrok data lama.\n\n## Dokumentasi\n\n- Scramble UI: `{{baseUrl}}/docs/api`\n- OpenAPI JSON: `{{baseUrl}}/docs/api.json`\n\n## Akun demo (dari seeder)\n\n- Email: `admin@showroom.test`\n- Password: `password123`\n\nSeluruh respons memakai amplop `{ \"message\": ..., \"data\": ... }`. Koleksi terpaginasi menambahkan `meta` dan `links`.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -17,7 +17,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://127.0.0.1:8000",
+      "value": "https://app-f4092249-75ca-459c-a6be-782e7a51f20c.cleverapps.io",
       "type": "string"
     },
     {
@@ -257,7 +257,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "auth", "me"]
             },
-            "description": "Butuh header `Authorization: Bearer {{token}}` (diwarisi dari auth koleksi). Tanpa token → **401** dengan amplop JSON."
+            "description": "Butuh header `Authorization: Bearer {{token}}` (diwarisi dari auth koleksi). Tanpa token â†’ **401** dengan amplop JSON."
           },
           "event": [
             {
@@ -413,7 +413,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "mobil", "{{mobilId}}"]
             },
-            "description": "Ambil satu unit berdasarkan ID. ID tidak ada → **404** dengan `data: null`."
+            "description": "Ambil satu unit berdasarkan ID. ID tidak ada â†’ **404** dengan `data: null`."
           },
           "event": [
             {
@@ -653,7 +653,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "mobil", "{{mobilHapusId}}"]
             },
-            "description": "Menghapus unit tanpa riwayat penyewaan → **200 OK**.\n\nBila unit masih punya riwayat penyewaan → **409 Conflict** (integritas foreign key)."
+            "description": "Menghapus unit tanpa riwayat penyewaan â†’ **200 OK**.\n\nBila unit masih punya riwayat penyewaan â†’ **409 Conflict** (integritas foreign key)."
           },
           "event": [
             {
@@ -816,7 +816,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "pelanggan", "{{pelangganId}}"]
             },
-            "description": "ID tidak ada → **404**."
+            "description": "ID tidak ada â†’ **404**."
           },
           "event": [
             {
@@ -992,7 +992,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "pelanggan"]
             },
-            "description": "NIK bukan 16 digit dan email tidak valid → **422**."
+            "description": "NIK bukan 16 digit dan email tidak valid â†’ **422**."
           },
           "event": [
             {
@@ -1016,7 +1016,7 @@
     },
     {
       "name": "Penyewaan",
-      "description": "Transaksi rental. Server menghitung `kode_booking`, `durasi_hari` (inklusif), `harga_sewa_per_hari`, dan `total_biaya`. Tanggal divalidasi anti-bentrok per unit.\n\n## Urutan wajib\n\nFolder ini berurutan dan saling bergantung:\n\n1. **Buat penyewaan** → status `booked`\n2. **Gagal bentrok jadwal** → memakai unit dan tanggal yang sama, harus `422`\n3. **Perbarui penyewaan** → status `berjalan`, unit jadi `disewa`\n4. **Kembalikan unit** → status `selesai`, unit kembali `tersedia`\n5. **Buat penyewaan (untuk dibatalkan)** → transaksi kedua, tanggal +30 hari\n6. **Batalkan penyewaan** → transaksi kedua jadi `batal`\n7. **Hapus penyewaan** → menghapus transaksi pertama\n\nPre-request script folder mengisi tanggal relatif terhadap hari ini, jadi tidak pernah kena validasi `after_or_equal:today`.",
+      "description": "Transaksi rental. Server menghitung `kode_booking`, `durasi_hari` (inklusif), `harga_sewa_per_hari`, dan `total_biaya`. Tanggal divalidasi anti-bentrok per unit.\n\n## Urutan wajib\n\nFolder ini berurutan dan saling bergantung:\n\n1. **Buat penyewaan** â†’ status `booked`\n2. **Gagal bentrok jadwal** â†’ memakai unit dan tanggal yang sama, harus `422`\n3. **Perbarui penyewaan** â†’ status `berjalan`, unit jadi `disewa`\n4. **Kembalikan unit** â†’ status `selesai`, unit kembali `tersedia`\n5. **Buat penyewaan (untuk dibatalkan)** â†’ transaksi kedua, tanggal +30 hari\n6. **Batalkan penyewaan** â†’ transaksi kedua jadi `batal`\n7. **Hapus penyewaan** â†’ menghapus transaksi pertama\n\nPre-request script folder mengisi tanggal relatif terhadap hari ini, jadi tidak pernah kena validasi `after_or_equal:today`.",
       "event": [
         {
           "listen": "prerequest",
@@ -1161,7 +1161,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "penyewaan"]
             },
-            "description": "Klien hanya mengirim unit, pelanggan, dan tanggal. Server menghitung sisanya.\n\nStatus sukses **201 Created**. Bila rentang tanggal bertumpuk dengan penyewaan aktif pada unit yang sama → **422** pada field `tanggal_mulai`."
+            "description": "Klien hanya mengirim unit, pelanggan, dan tanggal. Server menghitung sisanya.\n\nStatus sukses **201 Created**. Bila rentang tanggal bertumpuk dengan penyewaan aktif pada unit yang sama â†’ **422** pada field `tanggal_mulai`."
           },
           "event": [
             {
@@ -1550,7 +1550,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "auth", "me"]
             },
-            "description": "Request ini sengaja tanpa header Authorization (auth di-override `noauth`) → **401 Unauthorized** dalam format amplop JSON."
+            "description": "Request ini sengaja tanpa header Authorization (auth di-override `noauth`) â†’ **401 Unauthorized** dalam format amplop JSON."
           },
           "event": [
             {
