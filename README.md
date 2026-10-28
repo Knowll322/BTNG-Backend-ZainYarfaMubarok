@@ -90,7 +90,7 @@ endpoint login, sehingga penguji langsung tahu langkah berikutnya.
 - **Otentikasi Sanctum** — `register`, `login`, `me`, `logout` dengan Bearer token
 - **Upload foto unit** — disimpan ke Laravel Storage (disk `public`)
 - **Error handler global** — `401`, `404`, `405`, `409`, `422` tetap memakai amplop JSON yang sama
-- **49 feature test** (209 assertion) untuk CRUD, validasi, logika booking, denda, dan URL foto
+- **71 test** (290 assertion) untuk CRUD, validasi, logika booking, denda, URL foto, dan normalisasi `APP_URL`
 - **Koleksi Postman** - 32 request dalam 8 folder, dengan test script dan auto-capture token/ID
 
 ---
@@ -607,7 +607,7 @@ cadangan. Menulis `DB_*` secara manual justru berisiko menimpa nilai add-on.
 php artisan test
 ```
 
-Hasil saat ini: **49 passed, 209 assertions**.
+Hasil saat ini: **71 passed, 290 assertions**.
 
 Cakupan: amplop respons, validasi 422, 404 untuk data tidak ada, 409 untuk relasi FK, filter/pencarian/pagination, perhitungan durasi dan total, anti-bentrok jadwal, denda keterlambatan, sinkronisasi status unit, serta autentikasi token.
 
