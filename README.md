@@ -19,7 +19,7 @@ Proyek ini adalah Tugas Akhir Kelas Website Backend BTNG.
 | Base URL API | `https://<domain-anda>/api` |
 | Dokumentasi Interaktif (Scramble) | `https://<domain-anda>/docs/api` |
 | OpenAPI JSON | `https://<domain-anda>/docs/api.json` |
-| Repository | https://github.com/Knowll322/BTNG-Backend-ZainYarfaMubarok |
+| Repository | https://github.com/zainnanann2/BTNG-Backend-ZainYarfaMubarok |
 
 > Ganti `<domain-anda>` dengan domain aplikasi Clever Cloud setelah deploy (contoh: `app-xxxxxxxx.cleverapps.app`). Membuka root `/` akan otomatis diarahkan ke `/docs/api`.
 
@@ -115,7 +115,7 @@ Prasyarat: **PHP 8.2+**, **Composer**, **MySQL 8** (Laragon/XAMPP).
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/Knowll322/BTNG-Backend-ZainYarfaMubarok.git
+git clone https://github.com/zainnanann2/BTNG-Backend-ZainYarfaMubarok.git
 cd BTNG-Backend-ZainYarfaMubarok
 
 # 2. Install dependency
