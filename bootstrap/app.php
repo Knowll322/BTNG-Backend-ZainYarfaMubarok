@@ -39,7 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
              * jadi ditangani terpisah agar 401 tetap memakai amplop yang sama.
              */
             return response()->json([
-                'message' => 'Tidak terautentikasi. Sertakan header Authorization: Bearer <token>.',
+                'message' => 'Tidak terautentikasi. Login dulu di POST /api/auth/login untuk memperoleh token, lalu kirim header Authorization: Bearer <token>.',
                 'data' => null,
             ], 401);
         });
@@ -86,7 +86,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
             $status = $e->getStatusCode();
             $pesan = $e->getMessage() ?: match ($status) {
-                401 => 'Tidak terautentikasi. Sertakan header Authorization: Bearer <token>.',
+                401 => 'Tidak terautentikasi. Login dulu di POST /api/auth/login untuk memperoleh token, lalu kirim header Authorization: Bearer <token>.',
                 403 => 'Anda tidak memiliki akses ke resource ini.',
                 405 => 'Metode HTTP tidak diizinkan untuk endpoint ini.',
                 409 => 'Permintaan bertentangan dengan data yang ada.',

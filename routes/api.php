@@ -35,32 +35,46 @@ Route::prefix('auth')->group(function () {
     });
 });
 
-// --- Mobil ---
+/*
+ * Rute baca dibuka untuk umum agar penguji dapat langsung mencoba GET
+ * dari /docs/api tanpa perlu membuat akun lebih dulu.
+ */
 Route::get('/mobil', [MobilController::class, 'index']);
-Route::post('/mobil', [MobilController::class, 'store']);
 Route::get('/mobil/{mobil}', [MobilController::class, 'show']);
-Route::put('/mobil/{mobil}', [MobilController::class, 'update']);
-Route::patch('/mobil/{mobil}', [MobilController::class, 'update']);
-Route::delete('/mobil/{mobil}', [MobilController::class, 'destroy']);
-Route::post('/mobil/{mobil}/foto', [MobilController::class, 'uploadFoto']);
 
-// --- Pelanggan ---
 Route::get('/pelanggan', [PelangganController::class, 'index']);
-Route::post('/pelanggan', [PelangganController::class, 'store']);
 Route::get('/pelanggan/{pelanggan}', [PelangganController::class, 'show']);
-Route::put('/pelanggan/{pelanggan}', [PelangganController::class, 'update']);
-Route::patch('/pelanggan/{pelanggan}', [PelangganController::class, 'update']);
-Route::delete('/pelanggan/{pelanggan}', [PelangganController::class, 'destroy']);
 
-// --- Penyewaan ---
 Route::get('/penyewaan', [PenyewaanController::class, 'index']);
-Route::post('/penyewaan', [PenyewaanController::class, 'store']);
 Route::get('/penyewaan/{penyewaan}', [PenyewaanController::class, 'show']);
-Route::put('/penyewaan/{penyewaan}', [PenyewaanController::class, 'update']);
-Route::patch('/penyewaan/{penyewaan}', [PenyewaanController::class, 'update']);
-Route::delete('/penyewaan/{penyewaan}', [PenyewaanController::class, 'destroy']);
-Route::post('/penyewaan/{penyewaan}/kembalikan', [PenyewaanController::class, 'kembalikan']);
-Route::post('/penyewaan/{penyewaan}/batalkan', [PenyewaanController::class, 'batalkan']);
+
+/*
+ * Rute tulis wajib token Sanctum.
+ *
+ * Tanpa ini siapa pun yang mengetahui URL dapat menambah, mengubah, dan
+ * menghapus seluruh isi basis data produksi. Token diperoleh dari
+ * POST /api/auth/login, lalu dikirim sebagai header
+ * Authorization: Bearer <token>.
+ */
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/mobil', [MobilController::class, 'store']);
+    Route::put('/mobil/{mobil}', [MobilController::class, 'update']);
+    Route::patch('/mobil/{mobil}', [MobilController::class, 'update']);
+    Route::delete('/mobil/{mobil}', [MobilController::class, 'destroy']);
+    Route::post('/mobil/{mobil}/foto', [MobilController::class, 'uploadFoto']);
+
+    Route::post('/pelanggan', [PelangganController::class, 'store']);
+    Route::put('/pelanggan/{pelanggan}', [PelangganController::class, 'update']);
+    Route::patch('/pelanggan/{pelanggan}', [PelangganController::class, 'update']);
+    Route::delete('/pelanggan/{pelanggan}', [PelangganController::class, 'destroy']);
+
+    Route::post('/penyewaan', [PenyewaanController::class, 'store']);
+    Route::put('/penyewaan/{penyewaan}', [PenyewaanController::class, 'update']);
+    Route::patch('/penyewaan/{penyewaan}', [PenyewaanController::class, 'update']);
+    Route::delete('/penyewaan/{penyewaan}', [PenyewaanController::class, 'destroy']);
+    Route::post('/penyewaan/{penyewaan}/kembalikan', [PenyewaanController::class, 'kembalikan']);
+    Route::post('/penyewaan/{penyewaan}/batalkan', [PenyewaanController::class, 'batalkan']);
+});
 
 // --- Statistik dashboard ---
 Route::get('/statistik', [StatistikController::class, 'index']);

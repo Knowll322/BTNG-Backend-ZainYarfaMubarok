@@ -5,12 +5,23 @@ namespace Tests\Feature;
 use App\Models\Mobil;
 use App\Models\Pelanggan;
 use App\Models\Penyewaan;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class PelangganApiTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Rute tulis dijaga auth:sanctum; test bertindak sebagai pengguna
+        // terautentikasi. Rute GET tetap publik.
+        Sanctum::actingAs(User::factory()->create());
+    }
 
     private function dataPelanggan(array $override = []): array
     {

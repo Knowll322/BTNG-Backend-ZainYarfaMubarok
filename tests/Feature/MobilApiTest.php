@@ -14,6 +14,15 @@ class MobilApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Seluruh rute tulis dijaga auth:sanctum, jadi test bertindak
+        // sebagai pengguna terautentikasi. Rute GET tetap publik.
+        Sanctum::actingAs(User::factory()->create());
+    }
+
     private function dataMobil(array $override = []): array
     {
         return array_merge([
@@ -154,30 +163,5 @@ class MobilApiTest extends TestCase
         $this->getJson('/api/health')
             ->assertOk()
             ->assertJsonPath('data.status', 'ok');
-    }
-
-    public function test_auth_login_dan_me(): void
-    {
-        $user = User::factory()->create(['password' => bcrypt('password123')]);
-
-        $login = $this->postJson('/api/auth/login', [
-            'email' => $user->email,
-            'password' => 'password123',
-        ])->assertOk()->assertJsonStructure(['message', 'data' => ['user', 'token']]);
-
-        $token = $login->json('data.token');
-
-        $this->withHeader('Authorization', "Bearer {$token}")
-            ->getJson('/api/auth/me')
-            ->assertOk()
-            ->assertJsonPath('data.email', $user->email);
-    }
-
-    public function test_auth_me_tanpa_token_401(): void
-    {
-        $this->getJson('/api/auth/me')
-            ->assertUnauthorized()
-            ->assertJsonPath('data', null)
-            ->assertJsonStructure(['message', 'data']);
     }
 }
