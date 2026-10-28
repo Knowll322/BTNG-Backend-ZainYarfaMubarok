@@ -2,6 +2,23 @@
 
 use Illuminate\Support\Str;
 
+/*
+ * Kredensial MySQL bisa datang dari dua sumber, tergantung tempat aplikasi
+ * dijalankan:
+ *
+ *   1. DB_*           — lokal (Laragon/XAMPP), diisi manual di .env
+ *   2. MYSQL_ADDON_*  — add-on MySQL Clever Cloud, disuntik otomatis
+ *
+ * Clever Cloud tidak pernah mengisi nama DB_*, jadi tanpa fallback ini
+ * kredensial dari add-on tidak terbaca dan migrasi gagal saat start.
+ * Urutan DB_* lebih dulu agar nilai lokal tetap menang bila keduanya ada.
+ */
+$mysqlHost = env('DB_HOST', env('MYSQL_ADDON_HOST', '127.0.0.1'));
+$mysqlPort = env('DB_PORT', env('MYSQL_ADDON_PORT', '3306'));
+$mysqlDatabase = env('DB_DATABASE', env('MYSQL_ADDON_DB', 'laravel'));
+$mysqlUsername = env('DB_USERNAME', env('MYSQL_ADDON_USER', 'root'));
+$mysqlPassword = env('DB_PASSWORD', env('MYSQL_ADDON_PASSWORD', ''));
+
 return [
 
     /*
@@ -45,11 +62,11 @@ return [
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
+            'host' => $mysqlHost,
+            'port' => $mysqlPort,
+            'database' => $mysqlDatabase,
+            'username' => $mysqlUsername,
+            'password' => $mysqlPassword,
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => env('DB_CHARSET', 'utf8mb4'),
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
