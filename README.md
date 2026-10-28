@@ -550,9 +550,18 @@ cadangan. Menulis `DB_*` secara manual justru berisiko menimpa nilai add-on.
 php artisan test
 ```
 
-Hasil saat ini: **32 passed, 148 assertions**.
+Hasil saat ini: **32 passed, 151 assertions**.
 
 Cakupan: amplop respons, validasi 422, 404 untuk data tidak ada, 409 untuk relasi FK, filter/pencarian/pagination, perhitungan durasi dan total, anti-bentrok jadwal, denda keterlambatan, sinkronisasi status unit, serta autentikasi token.
+
+Koleksi Postman juga dijalankan langsung terhadap server produksi di Clever Cloud:
+
+```bash
+postman collection run postman/BTNG-Backend-ZainYarfaMubarok.postman_collection.json \
+  --env-var "baseUrl=https://app-f4092249-75ca-459c-a6be-782e7a51f20c.cleverapps.io"
+```
+
+Hasil: **31 request, 116 assertion, 0 gagal**, rata-rata 2,5 detik per request.
 
 ---
 
