@@ -52,7 +52,29 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    /*
+     * Nilai ini dibaca dua kali: sekali oleh web, sekali oleh console.
+     * Pada console, Illuminate\Foundation\Bootstrap\SetRequestForConsole
+     * memanggil Request::create(config('app.url')), sehingga satu karakter
+     * asing saja sudah cukup untuk menggagalkan seluruh proses build
+     * (composer install -> package:discover) dengan pesan
+     * "Invalid URI: Scheme is malformed" atau "Host is malformed".
+     *
+     * Variabel environment sering tersalin bersama tanda kutip atau spasi
+     * tak sengaja, jadi nilainya dinormalkan di sini. Bila hasilnya tetap
+     * bukan URL http(s) yang sah, dipakai nilai cadangan agar aplikasi
+     * masih bisa dibangun dan diperbaiki lewat environment variables.
+     */
+    'url' => (static function (): string {
+        $url = trim((string) env('APP_URL', ''), " \t\n\r\0\x0B\"'");
+
+        if ($url === '' || filter_var($url, FILTER_VALIDATE_URL) === false
+            || ! preg_match('#^https?://#i', $url)) {
+            return 'http://localhost';
+        }
+
+        return rtrim($url, '/');
+    })(),
 
     /*
     |--------------------------------------------------------------------------
