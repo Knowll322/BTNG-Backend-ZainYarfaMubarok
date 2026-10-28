@@ -1,4 +1,4 @@
-﻿# BTNG Showroom & Rental Mobil â€” REST API
+# BTNG Showroom & Rental Mobil — REST API
 
 Backend RESTful API untuk showroom dan rental mobil, dibangun dengan **Laravel 12**, **MySQL**, **Laravel Sanctum**, dan **Scramble** untuk dokumentasi interaktif.
 
@@ -46,7 +46,7 @@ password : password123
 
 Tiga langkah menguji endpoint bertoken lewat `/docs/api`:
 
-1. Buka **Auth â†’ Login**, tekan **Send**. Salin nilai `data.token` dari respons.
+1. Buka **Auth → Login**, tekan **Send**. Salin nilai `data.token` dari respons.
 2. Tekan tombol **Authorize** di kanan atas, tempel token, lalu **Authorize**.
 3. Endpoint `POST`/`PUT`/`PATCH`/`DELETE` kini dapat diuji lewat **Try it out**.
 
@@ -80,18 +80,18 @@ endpoint login, sehingga penguji langsung tahu langkah berikutnya.
 
 **Nilai tambah:**
 
-- **Anti-bentrok jadwal** â€” satu unit tidak bisa disewa pada rentang tanggal yang tumpang tindih
-- **Perhitungan otomatis** â€” `kode_booking`, `durasi_hari` (inklusif), `harga_sewa_per_hari`, dan `total_biaya` dihitung server, bukan dikirim klien
-- **Denda keterlambatan** â€” 50% Ã— harga sewa harian Ã— jumlah hari terlambat, dihitung saat unit dikembalikan
-- **Sinkronisasi status unit** â€” `tersedia` â‡„ `disewa` otomatis mengikuti status penyewaan
-- **Pencarian, filter, sorting, pagination** â€” lengkap dengan `meta` dan `links`
-- **Endpoint statistik** â€” pendapatan, okupansi, mobil terpopuler, penyewaan terbaru
-- **Integritas data** â€” `DELETE` mengembalikan `409` bila data masih punya riwayat penyewaan
-- **Otentikasi Sanctum** â€” `register`, `login`, `me`, `logout` dengan Bearer token
-- **Upload foto unit** â€” disimpan ke Laravel Storage (disk `public`)
-- **Error handler global** â€” `401`, `404`, `405`, `409`, `422` tetap memakai amplop JSON yang sama
+- **Anti-bentrok jadwal** — satu unit tidak bisa disewa pada rentang tanggal yang tumpang tindih
+- **Perhitungan otomatis** — `kode_booking`, `durasi_hari` (inklusif), `harga_sewa_per_hari`, dan `total_biaya` dihitung server, bukan dikirim klien
+- **Denda keterlambatan** — 50% × harga sewa harian × jumlah hari terlambat, dihitung saat unit dikembalikan
+- **Sinkronisasi status unit** — `tersedia` ⇄ `disewa` otomatis mengikuti status penyewaan
+- **Pencarian, filter, sorting, pagination** — lengkap dengan `meta` dan `links`
+- **Endpoint statistik** — pendapatan, okupansi, mobil terpopuler, penyewaan terbaru
+- **Integritas data** — `DELETE` mengembalikan `409` bila data masih punya riwayat penyewaan
+- **Otentikasi Sanctum** — `register`, `login`, `me`, `logout` dengan Bearer token
+- **Upload foto unit** — disimpan ke Laravel Storage (disk `public`)
+- **Error handler global** — `401`, `404`, `405`, `409`, `422` tetap memakai amplop JSON yang sama
 - **44 feature test** (195 assertion) untuk CRUD, validasi, logika booking, dan denda
-- **Koleksi Postman** â€” 29 request dalam 7 folder, dengan test script dan auto-capture token/ID
+- **Koleksi Postman** — 29 request dalam 7 folder, dengan test script dan auto-capture token/ID
 
 ---
 
@@ -134,19 +134,19 @@ endpoint login, sehingga penguji langsung tahu langkah berikutnya.
 |---|---|---|
 | `id` | bigint | Primary key |
 | `kode_booking` | string(30) | Unik, format `BK-YYYYMMDD-XXXXX` |
-| `mobil_id` | bigint | FK â†’ `mobils` |
-| `pelanggan_id` | bigint | FK â†’ `pelanggans` |
+| `mobil_id` | bigint | FK → `mobils` |
+| `pelanggan_id` | bigint | FK → `pelanggans` |
 | `tanggal_mulai` | date | Tanggal sewa mulai |
 | `tanggal_selesai` | date | Tanggal sewa selesai |
 | `durasi_hari` | smallint | Dihitung server (inklusif) |
 | `harga_sewa_per_hari` | bigint | Snapshot tarif saat booking |
-| `total_biaya` | bigint | `durasi_hari Ã— harga_sewa_per_hari` |
+| `total_biaya` | bigint | `durasi_hari × harga_sewa_per_hari` |
 | `denda` | bigint | Dihitung saat pengembalian |
 | `status` | enum | `booked`, `berjalan`, `selesai`, `batal` |
 | `tanggal_dikembalikan` | date | Nullable |
 | `catatan` | text | Opsional |
 
-**Relasi:** `Mobil` 1â€”N `Penyewaan`, `Pelanggan` 1â€”N `Penyewaan`.
+**Relasi:** `Mobil` 1—N `Penyewaan`, `Pelanggan` 1—N `Penyewaan`.
 
 ---
 
@@ -192,8 +192,8 @@ php artisan serve
 
 Buka:
 
-- Dokumentasi interaktif â†’ http://127.0.0.1:8000/docs/api
-- Base API â†’ http://127.0.0.1:8000/api
+- Dokumentasi interaktif → http://127.0.0.1:8000/docs/api
+- Base API → http://127.0.0.1:8000/api
 
 ---
 
@@ -235,8 +235,8 @@ Koleksi terpaginasi menambahkan `meta` dan `links`.
 
 | Method | Endpoint | Deskripsi | Token | Status |
 |---|---|---|---|---|
-| GET | `/api/mobil` | Daftar mobil (filter, search, sort, pagination) | â€” | 200 |
-| GET | `/api/mobil/{id}` | Detail mobil | â€” | 200 |
+| GET | `/api/mobil` | Daftar mobil (filter, search, sort, pagination) | — | 200 |
+| GET | `/api/mobil/{id}` | Detail mobil | — | 200 |
 | POST | `/api/mobil` | Tambah mobil | wajib | 201 |
 | PUT/PATCH | `/api/mobil/{id}` | Perbarui mobil | wajib | 200 |
 | DELETE | `/api/mobil/{id}` | Hapus mobil | wajib | 200 / 409 |
@@ -246,8 +246,8 @@ Koleksi terpaginasi menambahkan `meta` dan `links`.
 
 | Method | Endpoint | Deskripsi | Token | Status |
 |---|---|---|---|---|
-| GET | `/api/pelanggan` | Daftar pelanggan | â€” | 200 |
-| GET | `/api/pelanggan/{id}` | Detail pelanggan | â€” | 200 |
+| GET | `/api/pelanggan` | Daftar pelanggan | — | 200 |
+| GET | `/api/pelanggan/{id}` | Detail pelanggan | — | 200 |
 | POST | `/api/pelanggan` | Tambah pelanggan | wajib | 201 |
 | PUT/PATCH | `/api/pelanggan/{id}` | Perbarui pelanggan | wajib | 200 |
 | DELETE | `/api/pelanggan/{id}` | Hapus pelanggan | wajib | 200 / 409 |
@@ -256,8 +256,8 @@ Koleksi terpaginasi menambahkan `meta` dan `links`.
 
 | Method | Endpoint | Deskripsi | Token | Status |
 |---|---|---|---|---|
-| GET | `/api/penyewaan` | Daftar penyewaan | â€” | 200 |
-| GET | `/api/penyewaan/{id}` | Detail penyewaan | â€” | 200 |
+| GET | `/api/penyewaan` | Daftar penyewaan | — | 200 |
+| GET | `/api/penyewaan/{id}` | Detail penyewaan | — | 200 |
 | POST | `/api/penyewaan` | Buat penyewaan (anti-bentrok) | wajib | 201 |
 | PUT/PATCH | `/api/penyewaan/{id}` | Perbarui penyewaan | wajib | 200 |
 | DELETE | `/api/penyewaan/{id}` | Hapus penyewaan | wajib | 200 |
@@ -411,7 +411,7 @@ GET /api/mobil?brand=Toyota&status=tersedia&per_page=5
 }
 ```
 
-Bila tanggal bertumpuk dengan penyewaan lain pada unit yang sama â†’ **422**:
+Bila tanggal bertumpuk dengan penyewaan lain pada unit yang sama → **422**:
 
 ```json
 {
@@ -448,7 +448,7 @@ POST /api/penyewaan/9/kembalikan
 }
 ```
 
-Denda = 2 hari terlambat Ã— 50% Ã— Rp350.000 = Rp350.000.
+Denda = 2 hari terlambat × 50% × Rp350.000 = Rp350.000.
 
 ---
 
@@ -469,7 +469,7 @@ Denda = 2 hari terlambat Ã— 50% Ã— Rp350.000 = Rp350.000.
 | `max_harga_sewa` | `?max_harga_sewa=400000` | Tarif sewa harian maksimum |
 | `sort_by` | `?sort_by=harga` | `nama`, `brand`, `harga`, `harga_sewa_harian`, `tahun`, `created_at` |
 | `sort_dir` | `?sort_dir=asc` | `asc` / `desc` |
-| `per_page` | `?per_page=20` | 1â€“100, default 10 |
+| `per_page` | `?per_page=20` | 1–100, default 10 |
 
 ### `GET /api/pelanggan`
 
@@ -478,7 +478,7 @@ Denda = 2 hari terlambat Ã— 50% Ã— Rp350.000 = Rp350.000.
 | `search` | `?search=zain` | Cari di `nama`, `email`, `nik`, `telepon` |
 | `email` | `?email=a@b.com` | Filter email persis |
 | `sort_by` | `?sort_by=nama` | `nama`, `email`, `created_at` |
-| `per_page` | `?per_page=20` | 1â€“100 |
+| `per_page` | `?per_page=20` | 1–100 |
 
 ### `GET /api/penyewaan`
 
@@ -488,17 +488,17 @@ Denda = 2 hari terlambat Ã— 50% Ã— Rp350.000 = Rp350.000.
 | `mobil_id` | `?mobil_id=1` | Filter unit |
 | `pelanggan_id` | `?pelanggan_id=1` | Filter pelanggan |
 | `kode_booking` | `?kode_booking=BK-20261101-A7K2M` | Filter kode |
-| `dari` | `?dari=2026-11-01` | `tanggal_mulai` â‰¥ nilai |
-| `sampai` | `?sampai=2026-11-30` | `tanggal_selesai` â‰¤ nilai |
+| `dari` | `?dari=2026-11-01` | `tanggal_mulai` ≥ nilai |
+| `sampai` | `?sampai=2026-11-30` | `tanggal_selesai` ≤ nilai |
 | `search` | `?search=avanza` | Cari di kode, nama mobil, nama pelanggan |
 | `sort_by` | `?sort_by=total_biaya` | `tanggal_mulai`, `tanggal_selesai`, `total_biaya`, `created_at` |
-| `per_page` | `?per_page=20` | 1â€“100 |
+| `per_page` | `?per_page=20` | 1–100 |
 
 ---
 
 ## Dokumentasi API
 
-Dokumentasi interaktif dihasilkan otomatis oleh **Scramble** dari route, Form Request, dan API Resource â€” tidak perlu menulis anotasi manual.
+Dokumentasi interaktif dihasilkan otomatis oleh **Scramble** dari route, Form Request, dan API Resource — tidak perlu menulis anotasi manual.
 
 | URL | Isi |
 |---|---|
@@ -515,27 +515,34 @@ Gate::define('viewApiDocs', fn ($user = null) => true);
 
 ## Koleksi Postman
 
-Tersedia di [`postman/BTNG-Backend-ZainYarfaMubarok.postman_collection.json`](postman/BTNG-Backend-ZainYarfaMubarok.postman_collection.json) â€” **29 request** dalam 7 folder.
+Tersedia di [`postman/BTNG-Backend-ZainYarfaMubarok.postman_collection.json`](postman/BTNG-Backend-ZainYarfaMubarok.postman_collection.json) — **32 request** dalam 8 folder.
 
 | Folder | Isi |
 |---|---|
 | Health | Cek status API |
-| Auth | Register, Login, Profil saya, Logout |
+| Auth | Register, Login, Profil saya |
 | Mobil | Daftar, Detail, Tambah, Perbarui, Upload foto, Hapus, Gagal validasi (422) |
 | Pelanggan | Daftar, Detail, Tambah, Perbarui, Hapus, Gagal validasi (422) |
 | Penyewaan | Daftar, Detail, Buat, Perbarui, Kembalikan, Batalkan, Hapus, Gagal bentrok (422) |
 | Statistik | Ringkasan dashboard |
-| Error Handling | 404 endpoint tidak ada, 401 tanpa token |
+| Error Handling | 404 endpoint tidak ada, 401 tanpa token, 401 tulis tanpa token |
+| Logout (terakhir) | Mencabut token |
 
 Cara pakai:
 
 1. Import file JSON ke Postman.
-2. Sesuaikan variabel `baseUrl` â€” `http://127.0.0.1:8000` untuk lokal, atau URL Clever Cloud.
-3. Jalankan **Auth â†’ Login**. Token tersimpan otomatis ke variabel `token` dan dipakai semua request lewat auth Bearer koleksi.
-4. Jalankan **Mobil â†’ Tambah mobil** dan **Pelanggan â†’ Tambah pelanggan**. ID hasil simpan tersimpan otomatis ke `mobilId` / `pelangganId`.
-5. Jalankan **Penyewaan â†’ Buat penyewaan**. Pre-request script mengisi `tanggalMulai` (+7 hari) dan `tanggalSelesai` (+9 hari) secara otomatis.
+2. Sesuaikan variabel `baseUrl` — `http://127.0.0.1:8000` untuk lokal, atau URL Clever Cloud.
+3. Jalankan **Auth → Login**. Token tersimpan otomatis ke variabel `token` dan dipakai semua request lewat auth Bearer koleksi.
+4. Jalankan **Mobil → Tambah mobil** dan **Pelanggan → Tambah pelanggan**. ID hasil simpan tersimpan otomatis ke `mobilId` / `pelangganId`.
+5. Jalankan **Penyewaan → Buat penyewaan**. Pre-request script mengisi `tanggalMulai` (+7 hari) dan `tanggalSelesai` (+9 hari) secara otomatis.
+6. **Logout (terakhir)** dijalankan paling akhir — ia mencabut token, sehingga request sesudahnya akan ditolak 401. Untuk mengulang, jalankan koleksi dari awal.
 
-Setiap request punya test script yang memeriksa status code, amplop `message` + `data`, dan aturan bisnis (format `kode_booking`, `total_biaya = durasi_hari Ã— harga_sewa_per_hari`).
+Setiap request punya test script yang memeriksa status code, amplop `message` + `data`, dan aturan bisnis (format `kode_booking`, `total_biaya = durasi_hari × harga_sewa_per_hari`).
+
+> Koleksi ini membuat data baru saat dijalankan. Setelah dipakai terhadap server live,
+> hapus sisa uji agar data kembali sesuai seeder — mobil uji berciri plat berakhiran
+> ` TST`, penyewaan uji berciri `kode_booking` bersufiks alfanumerik acak (seeder
+> selalu memakai lima angka, mis. `BK-20261028-00001`).
 
 ---
 
@@ -543,7 +550,7 @@ Setiap request punya test script yang memeriksa status code, amplop `message` + 
 
 1. Buat aplikasi **PHP** di Clever Cloud, hubungkan repo GitHub ini (branch `main`).
 2. Tambahkan add-on **MySQL** dan tautkan (*link*) ke aplikasi.
-3. Buka **Environment variables** â†’ mode **EXPERT**, isi:
+3. Buka **Environment variables** → mode **EXPERT**, isi:
 
 ```
 CC_WEBROOT="/public"
@@ -562,7 +569,7 @@ Baris `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD`
 `MYSQL_ADDON_*`, dan `config/database.php` sudah membaca nama itu sebagai
 cadangan. Menulis `DB_*` secara manual justru berisiko menimpa nilai add-on.
 
-4. Klik **Update changes**, lalu **RE-BUILD AND START** (bukan sekadar START â€”
+4. Klik **Update changes**, lalu **RE-BUILD AND START** (bukan sekadar START —
    build diperlukan agar commit terbaru terpakai).
 5. Pantau tab **Logs** sampai Composer selesai, migrasi berjalan, dan Apache/PHP siap.
 6. Buka `https://app-f4092249-75ca-459c-a6be-782e7a51f20c.cleverapps.io/docs/api`.
@@ -577,7 +584,7 @@ cadangan. Menulis `DB_*` secara manual justru berisiko menimpa nilai add-on.
 - `CC_PHP_VERSION` sebaiknya `8.3` atau lebih baru; PHP 8.2 mencapai
   end-of-life pada 31 Desember 2026.
 - `CC_PRE_RUN_HOOK` menjalankan migrasi dan seeder setiap aplikasi start.
-  Keduanya idempoten, jadi aman diulang. Bila hook gagal, deploy ikut gagal â€”
+  Keduanya idempoten, jadi aman diulang. Bila hook gagal, deploy ikut gagal —
   periksa log.
 - `APP_KEY` harus diisi, kalau tidak semua request menghasilkan **500**.
 - Add-on dan aplikasi boleh berada di zona berbeda (di sini aplikasi Singapore,
@@ -602,7 +609,11 @@ postman collection run postman/BTNG-Backend-ZainYarfaMubarok.postman_collection.
   --env-var "baseUrl=https://app-f4092249-75ca-459c-a6be-782e7a51f20c.cleverapps.io"
 ```
 
-Hasil: **31 request, 116 assertion, 0 gagal**, rata-rata 2,5 detik per request.
+Hasil: **32 request, 122 assertion, 0 gagal**, rata-rata 3 detik per request.
+
+Request `Logout` sengaja diletakkan di folder terakhir karena ia mencabut
+token. Bila dijalankan lebih awal, seluruh request tulis sesudahnya akan
+mengirim token kosong dan berakhir 401.
 
 ---
 
