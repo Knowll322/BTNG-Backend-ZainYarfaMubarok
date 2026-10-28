@@ -16,51 +16,58 @@ namespace App\Support;
  * config('app.url').'/storage'. Nilai yang tidak bersih menghasilkan URL
  * foto yang tidak dapat dibuka.
  *
- * Bentuk kotor yang pernah terjadi di lapangan:
+ * Riwayat bentuk kotor yang benar-benar terjadi di Clever Cloud:
  *
  *   APP_URL="https://app.contoh.test"   <- seluruh baris tersimpan sebagai nilai
  *   "https://app.contoh.test"           <- tanda kutip ikut tersimpan
  *   https://app.contoh.test/            <- garis miring di akhir
  *   https://<domain-anda>               <- placeholder dari panduan
  *
- * Semua bentuk di atas dinormalkan di sini. Bila hasilnya tetap bukan URL
- * http(s) yang sah, dipakai nilai cadangan agar aplikasi masih dapat
- * dibangun dan diperbaiki lewat environment variables.
+ * Menangani satu per satu bentuk itu ternyata rapuh: perbaikan pertama
+ * hanya membuang tanda kutip, sehingga bentuk "baris utuh" tetap gagal dan
+ * diam-diam jatuh ke cadangan — URL foto menjadi http://localhost/... yang
+ * tampak wajar sehingga lolos pemeriksaan sekilas.
+ *
+ * Karena itu pendekatannya diganti: ambil URL http(s) pertama yang benar-benar
+ * ada di dalam nilai, apa pun bentuk pembungkusnya. Satu aturan menangani
+ * semua bentuk di atas sekaligus, termasuk bentuk baru yang belum terpikirkan.
  */
 class AppUrl
 {
     /**
-     * Nilai cadangan bila APP_URL tidak dapat dipakai.
+     * Nilai cadangan bila APP_URL tidak memuat URL yang dapat dipakai.
+     *
+     * Sengaja jelas-jelas lokal agar kesalahan konfigurasi tidak tersamarkan
+     * menjadi domain yang terlihat sah.
      */
     public const CADANGAN = 'http://localhost';
 
-    /**
-     * Karakter yang dibuang di kedua ujung nilai.
-     */
-    private const KUTIP = " \t\n\r\0\x0B\"'";
-
     public static function normalisasi(?string $mentah): string
     {
-        $url = trim((string) $mentah, self::KUTIP);
+        $mentah = (string) $mentah;
 
         /*
-         * Buang awalan "NAMA_VAR=" bila seluruh baris ikut tersimpan
-         * sebagai nilai — misalnya saat "APP_URL=https://..." ditempel ke
-         * kolom value milik variabel APP_URL di mode EXPERT Clever Cloud.
-         *
-         * URL yang sah tidak pernah diawali HURUF_BESAR_BERIKUT_TITIK_DUA,
-         * jadi pola ini tidak akan merusak nilai yang benar.
+         * Buang karakter tak terlihat yang kerap ikut tersalin dari browser
+         * atau dokumen: spasi tak terputus, spasi lebar nol, penanda urutan
+         * byte. Tanpa ini, URL yang tampak benar tetap gagal validasi.
          */
-        if (preg_match('/^[A-Z][A-Z0-9_]*\s*=\s*(.*)$/s', $url, $cocok)) {
-            $url = trim($cocok[1], self::KUTIP);
+        $mentah = preg_replace('/[\x{00A0}\x{200B}-\x{200D}\x{FEFF}]/u', ' ', $mentah) ?? $mentah;
+
+        /*
+         * Ambil URL pertama yang berbentuk http(s).
+         *
+         * Karakter yang mengakhiri URL: spasi, tanda kutip, kurung sudut
+         * (placeholder panduan seperti https://<domain-anda>), dan garis
+         * miring terbalik dari escape.
+         */
+        if (preg_match('#https?://[^\s"\'<>\\\\]+#i', $mentah, $cocok)) {
+            $url = rtrim($cocok[0], '/');
+
+            if (filter_var($url, FILTER_VALIDATE_URL) !== false) {
+                return $url;
+            }
         }
 
-        if ($url === ''
-            || filter_var($url, FILTER_VALIDATE_URL) === false
-            || ! preg_match('#^https?://#i', $url)) {
-            return self::CADANGAN;
-        }
-
-        return rtrim($url, '/');
+        return self::CADANGAN;
     }
 }
